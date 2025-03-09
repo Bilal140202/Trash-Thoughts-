@@ -1,0 +1,51 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thought Trash 🗑️ - Clear Your Mental Clutter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <div class="container">
+        <header class="app-header">
+            <h1>Thought Trash</h1>
+            <p class="app-description">Your personal mental decluttering space. Dump, delete, and destress.</p>
+        </header>
+
+        <div class="trash-thoughts-box">
+            <textarea id="thoughtInput" placeholder="Dump your trashy thoughts here... 🗑️"></textarea>
+            <div class="action-row">
+                <div class="emoji-picker">
+                    <button id="emojiTrigger">😀</button>
+                    <div id="emojiPanel" class="emoji-panel">
+                        <!-- Common emojis and Reddit-style emojis will be dynamically added -->
+                    </div>
+                </div>
+                <button id="trashBtn" class="trash-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div id="dustbin" class="dustbin">
+            <div class="dustbin-handle"></div>
+            <div class="dustbin-lid"></div>
+            <div class="dustbin-body">
+                <div class="trash-line"></div>
+                <div class="dustbin-container"></div>
+            </div>
+        </div>
+
+        <div id="quoteOverlay" class="quote-overlay">
+            <p id="quoteText" class="quote-text"></p>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
