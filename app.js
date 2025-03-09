@@ -176,3 +176,128 @@ async function analyzeTrashedThought(thought) {
         console.error("Thought analysis failed", error);
     }
 }
+
+// Add mood tracking feature
+function initMoodTracker() {
+    const moodTrackerContainer = document.createElement('div');
+    moodTrackerContainer.classList.add('mood-tracker');
+    
+    const moodTitle = document.createElement('h3');
+    moodTitle.textContent = 'How are you feeling?';
+    moodTrackerContainer.appendChild(moodTitle);
+
+    const moods = [
+        { emoji: '😄', label: 'Happy' },
+        { emoji: '😢', label: 'Sad' },
+        { emoji: '😠', label: 'Angry' },
+        { emoji: '😱', label: 'Anxious' },
+        { emoji: '🤔', label: 'Confused' },
+        { emoji: '😴', label: 'Tired' }
+    ];
+
+    const moodButtonsContainer = document.createElement('div');
+    moodButtonsContainer.classList.add('mood-buttons');
+
+    moods.forEach(mood => {
+        const moodButton = document.createElement('button');
+        moodButton.innerHTML = `${mood.emoji}<span>${mood.label}</span>`;
+        moodButton.addEventListener('click', async () => {
+            await room.collection('mood_logs').create({
+                mood: mood.label,
+                timestamp: new Date().toISOString()
+            });
+
+            // Provide personalized insight based on mood
+            try {
+                const insight = await websim.chat.completions.create({
+                    messages: [{
+                        role: "system",
+                        content: "Provide a short, compassionate supportive message based on the user's current mood."
+                    }, {
+                        role: "user",
+                        content: `My current mood is: ${mood.label}`
+                    }],
+                    max_tokens: 100
+                });
+
+                showMoodInsightModal(mood.emoji, insight.content);
+            } catch (error) {
+                console.error("Mood insight generation failed", error);
+            }
+        });
+        moodButtonsContainer.appendChild(moodButton);
+    });
+
+    moodTrackerContainer.appendChild(moodButtonsContainer);
+    document.querySelector('.container').insertBefore(moodTrackerContainer, document.querySelector('.trash-thoughts-box'));
+}
+
+function showMoodInsightModal(moodEmoji, insightText) {
+    const moodInsightModal = document.createElement('div');
+    moodInsightModal.classList.add('mood-insight-modal');
+    
+    moodInsightModal.innerHTML = `
+        <div class="mood-insight-content">
+            <div class="mood-emoji">${moodEmoji}</div>
+            <p class="mood-insight-text">${insightText}</p>
+            <button class="close-mood-insight">Close</button>
+        </div>
+    `;
+
+    moodInsightModal.querySelector('.close-mood-insight').addEventListener('click', () => {
+        document.body.removeChild(moodInsightModal);
+    });
+
+    document.body.appendChild(moodInsightModal);
+}
+
+function initThoughtStatistics() {
+    const statisticsBtn = document.createElement('button');
+    statisticsBtn.textContent = '📊 Thought Insights';
+    statisticsBtn.classList.add('statistics-button');
+    statisticsBtn.addEventListener('click', showThoughtStatistics);
+    document.querySelector('.action-row').appendChild(statisticsBtn);
+}
+
+async function showThoughtStatistics() {
+    const thoughts = await room.collection('trashed_thoughts').getList();
+    
+    const statisticsModal = document.createElement('div');
+    statisticsModal.classList.add('thought-statistics-modal');
+    
+    const insights = await websim.chat.completions.create({
+        messages: [{
+            role: "system",
+            content: "Analyze the list of thoughts and provide a brief, compassionate psychological insight."
+        }, {
+            role: "user",
+            content: thoughts.map(t => t.text).join('\n')
+        }],
+        max_tokens: 200
+    });
+
+    statisticsModal.innerHTML = `
+        <h2>Thought Insights</h2>
+        <div class="statistics-content">
+            <div class="stats-summary">
+                <p>Total Thoughts Trashed: ${thoughts.length}</p>
+                <p>Most Recent Thought: ${thoughts[0]?.text || 'No thoughts yet'}</p>
+            </div>
+            <div class="psychological-insight">
+                <h3>Psychological Perspective</h3>
+                <p>${insights.content}</p>
+            </div>
+        </div>
+        <button class="close-statistics">Close</button>
+    `;
+
+    statisticsModal.querySelector('.close-statistics').addEventListener('click', () => {
+        document.body.removeChild(statisticsModal);
+    });
+
+    document.body.appendChild(statisticsModal);
+}
+
+// Call new initialization functions
+initMoodTracker();
+initThoughtStatistics();
